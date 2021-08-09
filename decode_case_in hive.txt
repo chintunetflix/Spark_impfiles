@@ -1,0 +1,24 @@
+hive> select ename, if(ename='KING',1,if (ename = 'SMITH',2,3)) ename1
+    > from emp;
+OK
+SMITH	2
+ALLEN	3
+WARD	3
+JONES	3
+MARTIN	3
+BLAKE	3
+CLARK	3
+SCOTT	3
+KING	1
+TURNER	3
+ADAMS	3
+JAMES	3
+FORD	3
+MILLER	3
+
+select ename, case 
+                   when ename = 'KING' then 2
+                   when ename = 'SMITH' then 1
+                   else 3 
+                   end ename1
+     from emp;

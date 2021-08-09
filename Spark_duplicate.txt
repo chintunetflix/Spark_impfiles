@@ -1,0 +1,10 @@
+Dataset<Row> New = df.withColumn("Duplicate", count("*").over( Window.partitionBy("id") ) );
+
+Dataset<Row> Dups = New.filter(col("Duplicate").gt(1));
+
+Dataset<Row> Uniques = New.filter(col("Duplicate").equalTo(1));
+
+===================================================================
+
+
+df.groupBy($"field1",$"field2"...).count.filter($"count" > 1).show()

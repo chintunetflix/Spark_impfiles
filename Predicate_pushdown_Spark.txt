@@ -1,0 +1,31 @@
+For example, given a CQL table with the following schema:
+
+CREATE TABLE test.common (
+    year int,
+    birthday timestamp,
+    userid uuid,
+    likes text,
+    name text,
+    PRIMARY KEY (year, birthday, userid)
+)
+Suppose you want to write a query that selects all entries where the birthday is earlier than a given date:
+
+SELECT * FROM test.common WHERE birthday < '2001-1-1';
+Use the EXPLAIN command to see the query plan:
+
+EXPLAIN SELECT * FROM test.common WHERE birthday < '2001-1-1';
+== Physical Plan ==
+*Filter (cast(birthday#1 as string) < 2001-1-1)
++- *Scan org.apache.spark.sql.cassandra.CassandraSourceRelation [year#0,birthday#1,userid#2,likes#3,name#4] ReadSchema: struct<year:int,birthday:timestamp,userid:string,likes:string,name:string>
+Time taken: 0.72 seconds, Fetched 1 row(s)
+Note that the Filter directive is treating the birthday column, a CQL TIMESTAMP, as a string. The query optimizer looks at this comparison and needs to make the types match before generating a predicate. In this case the optimizer decides to cast the birthday column as a string to match the string '2001-1-1', but cast functions cannot be pushed down. The predicate isn't pushed down, and it doesn't appear in PushedFilters. A full table scan will be performed at the database layer, with the results returned to Spark for further processing.
+
+To push down the correct predicate for this query, use the cast method to specify that the predicate is comparing the birthday column to a TIMESTAMP, so the types match and the optimizer can generate the correct predicate.
+
+EXPLAIN SELECT * FROM test.common WHERE birthday < cast('2001-1-1' as TIMESTAMP);
+== Physical Plan ==
+*Scan org.apache.spark.sql.cassandra.CassandraSourceRelation [year#0,birthday#1,userid#2,likes#3,name#4] 
+PushedFilters: [*LessThan(birthday,2001-01-01 00:00:00.0)], 
+ReadSchema: struct<year:int,birthday:timestamp,userid:string,likes:string,name:string>
+Time taken: 0.034 seconds, Fetched 1 row(s)
+Note the PushedFilters indicating that the LessThan predicate will be pushed down for the column data in birthday. This should speed up the query as a full table scan will be avoided.

@@ -1,0 +1,16 @@
+Yes, now Hive supports IN or EXIST, operators. Also, you can use left semi join here. 
+Left Semi Join performs the same operation IN do in SQL.
+
+So if you have the below query in SQL-
+
+SELECT a.key, a.value
+FROM a
+WHERE a.key in
+(SELECT b.key
+FROM B);
+Then the suitable query for the same in Hive can be-
+
+SELECT a.key, a.val
+FROM a LEFT SEMI JOIN b on (a.key = b.key)
+
+

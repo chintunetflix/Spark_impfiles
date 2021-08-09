@@ -1,0 +1,7 @@
+Powered by Apache Calcite, the CBO optimizes and calculates the cost of various plans for a query. 
+The main goal of a CBO is to generate efficient execution plans by examining the tables and conditions specified in the query, 
+ultimately cutting down on query execution time and reducing resource utilization.
+
+The CBO uses column and table statistics stored in the Hive metastore to create query plans that improve query performance.
+ ... The CBO uses these statistics to estimate the cardinality and number of distinct values, etc. 
+These estimates then help generate highly efficient query plans.

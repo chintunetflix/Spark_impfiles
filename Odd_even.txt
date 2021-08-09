@@ -1,0 +1,6 @@
+def isEvenBroke(n: Option[Integer]): Option[Boolean] = {
+  val num = n.getOrElse(return None)
+  Some(num % 2 == 0)
+}
+
+val isEvenBrokeUdf = udf[Option[Boolean], Option[Integer]](isEvenBroke)
